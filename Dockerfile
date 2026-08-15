@@ -13,5 +13,5 @@ COPY . /app
 # Expose port 8000 for the web server
 EXPOSE 8000
 
-# Start the uvicorn server
-CMD ["uvicorn", "backend.server:app", "--host", "0.0.0.0", "--port", "8000"]
+# Start the uvicorn server (Respects the PORT environment variable provided by Render)
+CMD uvicorn backend.server:app --host 0.0.0.0 --port ${PORT:-8000}
