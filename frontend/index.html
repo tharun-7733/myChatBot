@@ -383,7 +383,8 @@ async function sendMessage(){
   try{
     const res=await fetch(getBackendURL()+'/chat',{
       method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({messages:conv.messages,system_prompt:getSystemPrompt(),temperature:getTemp(),max_new_tokens:getTokens(),top_p:getTopP()})
+      body:JSON.stringify({messages:conv.messages,system_prompt:getSystemPrompt(),temperature:getTemp(),max_new_tokens:getTokens(),top_p:getTopP()}),
+      signal:AbortSignal.timeout(60000)
     });
     if(!res.ok||!res.body)throw new Error('Server error: '+res.status);
     const reader=res.body.getReader(), decoder=new TextDecoder();
@@ -421,7 +422,7 @@ document.getElementById('settings-overlay').addEventListener('click',function(e)
 async function checkHealth(){
   const d1=document.getElementById('status-dot'),det=document.getElementById('status-detail'),d2=document.getElementById('header-status-dot'),txt=document.getElementById('header-status-text');
   try{
-    const res=await fetch(getBackendURL()+'/health',{signal:AbortSignal.timeout(6000)});
+    const res=await fetch(getBackendURL()+'/health',{signal:AbortSignal.timeout(60000)});
     if(res.ok){d1.classList.add('status-online');d1.style.background='#10b981';det.textContent='Backend ready';d2.style.background='#10b981';txt.textContent='Online';txt.style.color='#10b981';}
     else throw new Error();
   }catch{d1.style.background='#f59e0b';det.textContent='Waking up GPU…';d2.style.background='#f59e0b';txt.textContent='Connecting…';txt.style.color='#b9cacb';}
