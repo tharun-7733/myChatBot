@@ -1,17 +1,25 @@
-FROM python:3.11-slim
+FROM vllm/vllm-openai:v0.5.4
 
-# Set working directory
-WORKDIR /app
+# HF Spaces run as a non-root user, so we set up a user 'user'
+RUN useradd -m -u 1000 user
+USER user
 
-# Install dependencies first (leverages Docker cache for speed)
-COPY backend/requirements.txt /app/backend/requirements.txt
-RUN pip install --no-cache-dir -r /app/backend/requirements.txt
+# Set environment variables
+ENV HOME=/home/user \
+    PATH=/home/user/.local/bin:$PATH \
+    PORT=7860
 
-# Copy the entire app
-COPY . /app
+# Set the working directory
+WORKDIR $HOME/app
 
-# Expose port 8000 for the web server
-EXPOSE 8000
+# Copy the app files
+COPY --chown=user . $HOME/app
 
-# Start the uvicorn server (Respects the PORT environment variable provided by Render)
-CMD uvicorn backend.server:app --host 0.0.0.0 --port ${PORT:-8000}
+# Install FastAPI dependencies
+RUN pip install --no-cache-dir -r backend/requirements.txt
+
+# Expose the HF space port
+EXPOSE 7860
+
+# Run the startup script
+CMD ["bash", "run_space.sh"]
