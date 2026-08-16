@@ -63,4 +63,4 @@ demo = gr.Interface(
     outputs=gr.Textbox(label="response")
 )
 
-demo.launch()
+demo.launch(ssr_mode=False)
