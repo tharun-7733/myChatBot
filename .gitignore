@@ -3,3 +3,4 @@ __pycache__
 model/
 model_debug/
 .env
+.DS_Store

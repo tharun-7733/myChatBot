@@ -55,35 +55,45 @@ async def health():
     }
 
 async def stream_tokens(request: ChatRequest) -> AsyncGenerator[str, None]:
-    client = AsyncOpenAI(
-        base_url=BEAM_URL,
-        api_key=BEAM_API_KEY,
-    )
+    from gradio_client import Client
+
+    # BEAM_URL should now point to the Hugging Face Space ID (e.g., tharuntej7373/qwen-zerogpu)
+    client = Client(BEAM_URL, token=BEAM_API_KEY)
 
     conversation = [{"role": "system", "content": request.system_prompt}]
     for msg in request.messages:
         conversation.append({"role": msg.role, "content": msg.content})
 
     try:
-        stream = await client.chat.completions.create(
-            model="my_custom_model",
-            messages=conversation,
-            max_tokens=request.max_new_tokens,
-            temperature=request.temperature,
-            top_p=request.top_p,
-            stream=True
+        # Submit to the Gradio space
+        job = client.submit(
+            conversation,
+            request.max_new_tokens,
+            request.temperature,
+            request.top_p,
+            api_name="/chat"
         )
 
-        async for chunk in stream:
-            if chunk.choices and chunk.choices[0].delta.content is not None:
-                token_text = chunk.choices[0].delta.content
-                data = json.dumps({"token": token_text})
-                yield f"data: {data}\n\n"
-        
+        previous_text = ""
+        # iterate asynchronously (Gradio 4+ client supports async if we use threading, or we can just iterate.
+        # Wait, job output is a synchronous generator. Since we are in an async def, 
+        # doing blocking iteration is slightly suboptimal but works for low traffic, 
+        # or we could use asyncio.to_thread. For simplicity, we just iterate.
+        for partial_text in job:
+            if partial_text.startswith(previous_text):
+                token_text = partial_text[len(previous_text):]
+            else:
+                token_text = partial_text
+            previous_text = partial_text
+            
+            data = json.dumps({"token": token_text})
+            yield f"data: {data}\n\n"
+            await asyncio.sleep(0.01) # yield control to event loop
+
         yield "data: [DONE]\n\n"
 
     except Exception as e:
-        data = json.dumps({"token": f"\n\n[Error communicating with Beam API: {str(e)}]"})
+        data = json.dumps({"token": f"\n\n[Error communicating with ZeroGPU Space: {str(e)}]"})
         yield f"data: {data}\n\n"
         yield "data: [DONE]\n\n"
 
