@@ -10,7 +10,7 @@ qwen_lora_api = VLLM(
     gpu="A10G",  # The A10G is cost-effective and easily handles a 1.5B model
     secrets=["HF_TOKEN"], # This tells Beam to inject your Hugging Face token securely
     vllm_version="0.6.2",
-    custom_image=Image(
+    image=Image(
         python_version="python3.11",
         python_packages=["cachetools==5.3.3"]
     ),

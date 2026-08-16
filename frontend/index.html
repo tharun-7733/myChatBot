@@ -384,7 +384,7 @@ async function sendMessage(){
     const res=await fetch(getBackendURL()+'/chat',{
       method:'POST', headers:{'Content-Type':'application/json'},
       body:JSON.stringify({messages:conv.messages,system_prompt:getSystemPrompt(),temperature:getTemp(),max_new_tokens:getTokens(),top_p:getTopP()}),
-      signal:AbortSignal.timeout(60000)
+      signal:AbortSignal.timeout(300000) // Increased to 5 minutes for GPU cold starts
     });
     if(!res.ok||!res.body)throw new Error('Server error: '+res.status);
     const reader=res.body.getReader(), decoder=new TextDecoder();
