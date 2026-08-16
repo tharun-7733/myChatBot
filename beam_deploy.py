@@ -12,7 +12,7 @@ qwen_lora_api = VLLM(
     vllm_version="0.6.2",
     image=Image(
         python_version="python3.11",
-        python_packages=["cachetools==5.3.3"]
+        python_packages=["cachetools==5.5.2"]
     ),
     vllm_args=VLLMArgs(
         model="Qwen/Qwen2.5-1.5B-Instruct",
