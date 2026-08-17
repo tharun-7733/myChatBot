@@ -496,7 +496,10 @@
 <script>
   // ── State ──────────────────────────────────────────────────────────────────
   let conversations = [], activeConvId = null, isStreaming = false;
-  const BACKEND_URL = 'http://localhost:8000';
+  // TODO: Replace with your actual deployed backend URL (e.g., your Render URL)
+  const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+    ? 'http://localhost:8000' 
+    : 'https://mychatbot-5d8v.onrender.com'; // <-- Update this before pushing!
 
   // ── Sidebar ────────────────────────────────────────────────────────────────
   function toggleSidebar() {
